@@ -1,2 +1,2 @@
-Q: How do I disable colors?
-Use the `-c` flag: `./cbobble -c`. Colors also auto-disable when piping output.
+Q: Why does the animation look jerky?
+The default was 4 frames which jumped between positions. v0.3.0 adds 8 frames with a pause at the edges for a smoother, more natural bobble. You can also tweak the speed with `-s`.
