@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define VERSION "0.2.0"
+#define VERSION "0.3.0"
 
 static volatile int running = 1;
 static int use_color = 1;
@@ -21,6 +21,7 @@ static void handle_signal(int sig) {
 #define CLR_BODY  "\033[37m"
 #define CLR_FEET  "\033[35m"
 
+/* 8 frames for smooth left-right-left bobble with a pause at center */
 static const char *frames_plain[] = {
 	"   ___\n"
 	"  (o o)\n"
@@ -40,23 +41,56 @@ static const char *frames_plain[] = {
 	"   | |\n"
 	"  _d b_\n",
 
+	"      ___\n"
+	"     (o o)\n"
+	"  /| |\\\n"
+	"   | |\n"
+	"  _d b_\n",
+
+	"      ___\n"
+	"     (o o)\n"
+	"  /| |\\\n"
+	"   | |\n"
+	"  _d b_\n",
+
+	"     ___\n"
+	"    (o o)\n"
+	"  /| |\\\n"
+	"   | |\n"
+	"  _d b_\n",
+
 	"    ___\n"
 	"   (o o)\n"
 	"  /| |\\\n"
 	"   | |\n"
 	"  _d b_\n",
+
+	"   ___\n"
+	"  (o o)\n"
+	"  /| |\\\n"
+	"   | |\n"
+	"  _d b_\n",
 };
 
-static char frames_color[4][256];
+#define NFRAMES 8
+#define FRAME_HEIGHT 5
+
+static char frames_color[NFRAMES][256];
 
 static void build_color_frames(void) {
-	const char *heads[]  = { "   ___", "    ___", "     ___", "    ___" };
-	const char *faces[]  = { "  (o o)", "   (o o)", "    (o o)", "   (o o)" };
+	const char *heads[]  = {
+		"   ___", "    ___", "     ___", "      ___",
+		"      ___", "     ___", "    ___", "   ___"
+	};
+	const char *faces[]  = {
+		"  (o o)", "   (o o)", "    (o o)", "     (o o)",
+		"     (o o)", "    (o o)", "   (o o)", "  (o o)"
+	};
 	const char *body  = "  /| |\\";
 	const char *waist = "   | |";
 	const char *feet  = "  _d b_";
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < NFRAMES; i++) {
 		snprintf(frames_color[i], sizeof(frames_color[i]),
 			"%s%s%s\n%s%s%s\n%s%s%s\n%s%s%s\n%s%s%s\n",
 			CLR_HEAD, heads[i], CLR_RESET,
@@ -67,19 +101,16 @@ static void build_color_frames(void) {
 	}
 }
 
-#define NFRAMES 4
-#define FRAME_HEIGHT 5
-
 static void usage(void) {
 	printf("usage: cbobble [-s speed_ms] [-c] [-v] [-h]\n\n");
-	printf("  -s MS    frame delay in milliseconds (default: 200)\n");
+	printf("  -s MS    frame delay in milliseconds (default: 150)\n");
 	printf("  -c       disable color output\n");
 	printf("  -v       print version\n");
 	printf("  -h       show this help\n");
 }
 
 int main(int argc, char **argv) {
-	int delay_ms = 200;
+	int delay_ms = 150;
 	int opt;
 
 	while ((opt = getopt(argc, argv, "s:cvh")) != -1) {
@@ -131,4 +162,3 @@ int main(int argc, char **argv) {
 	printf("\033[?25h\n");
 	return 0;
 }
-/* 02 applied 2026-06-09 */
