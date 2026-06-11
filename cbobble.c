@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <signal.h>
 
-#define VERSION "0.3.0"
+#define VERSION "0.4.0"
 
 static volatile int running = 1;
 static int use_color = 1;
@@ -21,7 +21,6 @@ static void handle_signal(int sig) {
 #define CLR_BODY  "\033[37m"
 #define CLR_FEET  "\033[35m"
 
-/* 8 frames for smooth left-right-left bobble with a pause at center */
 static const char *frames_plain[] = {
 	"   ___\n"
 	"  (o o)\n"
@@ -78,11 +77,11 @@ static const char *frames_plain[] = {
 static char frames_color[NFRAMES][256];
 
 static void build_color_frames(void) {
-	const char *heads[]  = {
+	const char *heads[] = {
 		"   ___", "    ___", "     ___", "      ___",
 		"      ___", "     ___", "    ___", "   ___"
 	};
-	const char *faces[]  = {
+	const char *faces[] = {
 		"  (o o)", "   (o o)", "    (o o)", "     (o o)",
 		"     (o o)", "    (o o)", "   (o o)", "  (o o)"
 	};
@@ -102,8 +101,9 @@ static void build_color_frames(void) {
 }
 
 static void usage(void) {
-	printf("usage: cbobble [-s speed_ms] [-c] [-v] [-h]\n\n");
+	printf("usage: cbobble [-s speed_ms] [-n loops] [-c] [-v] [-h]\n\n");
 	printf("  -s MS    frame delay in milliseconds (default: 150)\n");
+	printf("  -n N     number of bobble cycles (default: infinite)\n");
 	printf("  -c       disable color output\n");
 	printf("  -v       print version\n");
 	printf("  -h       show this help\n");
@@ -111,12 +111,16 @@ static void usage(void) {
 
 int main(int argc, char **argv) {
 	int delay_ms = 150;
+	int loops = 0;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "s:cvh")) != -1) {
+	while ((opt = getopt(argc, argv, "s:n:cvh")) != -1) {
 		switch (opt) {
 		case 's':
 			delay_ms = atoi(optarg);
+			break;
+		case 'n':
+			loops = atoi(optarg);
 			break;
 		case 'c':
 			use_color = 0;
@@ -147,6 +151,7 @@ int main(int argc, char **argv) {
 	printf("\033[?25l");
 
 	int frame = 0;
+	int cycles = 0;
 	printf("\n\n\n\n\n");
 	while (running) {
 		printf("\033[%dA", FRAME_HEIGHT);
@@ -156,10 +161,11 @@ int main(int argc, char **argv) {
 			printf("%s", frames_plain[frame]);
 		fflush(stdout);
 		frame = (frame + 1) % NFRAMES;
+		if (frame == 0 && loops > 0 && ++cycles >= loops)
+			break;
 		usleep(delay_ms * 1000);
 	}
 
 	printf("\033[?25h\n");
 	return 0;
 }
-/* 03 applied 2026-06-10 */
