@@ -1,2 +1,2 @@
-Q: Why does the animation look jerky?
-The default was 4 frames which jumped between positions. v0.3.0 adds 8 frames with a pause at the edges for a smoother, more natural bobble. You can also tweak the speed with `-s`.
+Q: Can cbobble exit automatically after a set time?
+Yes — use `-n` to set the number of bobble cycles. For example `./cbobble -n 5` runs 5 full head-bob cycles then exits cleanly.
